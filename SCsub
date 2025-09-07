@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+
+from SCons.Script import Environment
+import os
+from SCons.Script import Exit
+
+Import('env')
+Import("env_modules")
+
+env_llama = env_modules.Clone()
+
+# Thirdparty source files
+
+thirdparty_obj = []
+
+if env.get("use_volk", False):
+	print("using volk and llama.cpp is not supported at the time")
+	Exit(1)
+
+if env["builtin_llama"]:
+	# Thirdparty source files
+	thirdparty_dir = "thirdparty/llama/"
+
+	thirdparty_sources = [
+		"ggml/src/ggml.cpp",
+		"ggml/src/ggml-alloc.c",
+		"ggml/src/ggml-backend.cpp",
+		"ggml/src/ggml-backend-reg.cpp",
+		"ggml/src/ggml-opt.cpp",
+		"ggml/src/ggml-threading.cpp",
+		"ggml/src/ggml-quants.c",
+		"ggml/src/gguf.cpp",
+
+
+		"ggml/src/ggml-cpu/ggml-cpu.cpp",
+		"ggml/src/ggml-cpu/repack.cpp",
+		"ggml/src/ggml-cpu/hbm.cpp",
+		"ggml/src/ggml-cpu/binary-ops.cpp",
+		"ggml/src/ggml-cpu/unary-ops.cpp",
+		"ggml/src/ggml-cpu/vec.cpp",
+		"ggml/src/ggml-cpu/ops.cpp",
+		"ggml/src/ggml-cpu/quants.c",
+		"ggml/src/ggml-cpu/traits.cpp",
+
+		"src/llama.cpp",
+		"src/llama-adapter.cpp",
+		"src/llama-arch.cpp",
+		"src/llama-batch.cpp",
+		"src/llama-chat.cpp",
+		"src/llama-context.cpp",
+		"src/llama-cparams.cpp",
+		"src/llama-grammar.cpp",
+		"src/llama-graph.cpp",
+		"src/llama-hparams.cpp",
+		"src/llama-impl.cpp",
+		"src/llama-io.cpp",
+		"src/llama-kv-cache.cpp",
+		"src/llama-kv-cache-iswa.cpp",
+		"src/llama-memory.cpp",
+		"src/llama-memory-hybrid.cpp",
+		"src/llama-memory-recurrent.cpp",
+		"src/llama-mmap.cpp",
+		"src/llama-model-loader.cpp",
+		"src/llama-model-saver.cpp",
+		"src/llama-model.cpp",
+		"src/llama-quant.cpp",
+		"src/llama-sampling.cpp",
+		"src/llama-vocab.cpp",
+		"src/unicode-data.cpp",
+		"src/unicode.cpp",
+	]
+
+	if env["vulkan"]:
+		env_llama.Append(CPPDEFINES=[
+			'GGML_USE_VULKAN'
+		])
+		#env_llama.Append(CPPPATH=['#thirdparty/vulkan/include'])
+
+		if False :
+			vulkan_shaders_dir = thirdparty_dir + "ggml/src/ggml-vulkan/vulkan-shaders"
+			gen_src = vulkan_shaders_dir + "/vulkan-shaders-gen.cpp"
+
+			# Build/run the generator with a clean host environment, independent of env_llama
+			tool_env = Environment(tools=['default'], ENV=os.environ.copy())
+
+			shader_tool = tool_env.Program(target="#bin/vulkan-shaders-gen", source=gen_src)
+
+			# Generate ggml-vulkan-shaders.* from the compiled generator
+			shader_targets = [
+				vulkan_shaders_dir + "/../ggml-vulkan-shaders.hpp",
+				vulkan_shaders_dir + "/../ggml-vulkan-shaders.cpp",
+			]
+			tool_env.Command(
+				shader_targets,
+				shader_tool,
+				'"$SOURCE"',
+				chdir=tool_env.Dir(vulkan_shaders_dir).abspath,
+			)
+
+		thirdparty_sources += [
+			"ggml/src/ggml-vulkan/ggml-vulkan-shaders.cpp",
+			"ggml/src/ggml-vulkan/ggml-vulkan.cpp",
+		]
+
+	env_llama.Append(CPPDEFINES=['GGML_USE_CPU'])
+
+	thirdparty_sources = [thirdparty_dir + file for file in thirdparty_sources]
+
+	env_llama.Prepend(CPPEXTPATH=[
+		thirdparty_dir, thirdparty_dir + "/include",
+		thirdparty_dir + "/ggml/include",
+		thirdparty_dir + "/ggml/src",
+		thirdparty_dir + "/ggml/src/ggml-cpu",
+	])
+
+	env_thirdparty = env_llama.Clone()
+	env_thirdparty.disable_warnings()
+	env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sources)
+	env.modules_sources += thirdparty_obj
+
+# Godot source files
+
+module_obj = []
+
+env_llama.add_source_files(module_obj, 'llama_context.cpp')
+env_llama.add_source_files(module_obj, 'llama_vocab.cpp')
+env_llama.add_source_files(module_obj, 'llama_tokenizer.cpp')
+env_llama.add_source_files(module_obj, 'llama_sampler_chain.cpp')
+env_llama.add_source_files(module_obj, 'llama_sampler.cpp')
+env_llama.add_source_files(module_obj, 'sampler/*.cpp')
+env_llama.add_source_files(module_obj, 'llama_chat.cpp')
+env_llama.add_source_files(module_obj, 'llama_cpp.cpp')
+env_llama.add_source_files(module_obj, 'llama_gguf.cpp')
+env_llama.add_source_files(module_obj, 'llama_model_file.cpp')
+env_llama.add_source_files(module_obj, 'llama_model_instance.cpp')
+env_llama.add_source_files(module_obj, 'register_types.cpp')
+env_llama.add_source_files(module_obj, 'ggml_core_c.c')
+env_llama.add_source_files(module_obj, 'ggml_cpu_core_c.c')
+env_llama.add_source_files(module_obj, 'arch/*.cpp')
+env_llama.add_source_files(module_obj, 'arch/*.c')
+
+env.modules_sources += module_obj
+
+env.Depends(module_obj, thirdparty_obj)
