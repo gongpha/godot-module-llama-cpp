@@ -13,10 +13,6 @@ env_llama = env_modules.Clone()
 
 thirdparty_obj = []
 
-if env.get("use_volk", False):
-	print("using volk and llama.cpp is not supported at the time")
-	Exit(1)
-
 if env["builtin_llama"]:
 	# Thirdparty source files
 	thirdparty_dir = "thirdparty/llama/"
@@ -71,6 +67,10 @@ if env["builtin_llama"]:
 	]
 
 	if env["vulkan"]:
+		if env.get("use_volk", False):
+			print("using volk and llama.cpp with vulkan support is not supported at the time")
+			Exit(1)
+
 		env_llama.Append(CPPDEFINES=[
 			'GGML_USE_VULKAN'
 		])
