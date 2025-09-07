@@ -4,6 +4,7 @@
 #include "core/string/ustring.h"
 #include "core/variant/typed_array.h"
 #include "thirdparty/llama/include/llama.h"
+#include <string>
 class LlamaModelInstance;
 struct llama_vocab;
 
@@ -11,6 +12,8 @@ class LlamaVocab : public RefCounted {
 	GDCLASS(LlamaVocab, RefCounted);
 
 	const llama_vocab* vocab;
+	// Buffer to carry trailing incomplete UTF-8 bytes between calls to token_to_piece()
+	mutable std::string utf8_carry;
 
 public:
 

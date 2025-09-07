@@ -74,6 +74,14 @@ Ref<Resource> ResourceFormatLoaderLlamaGGUF::load(const String &p_path, const St
 	const int64_t n = gguf_get_n_kv(ctx);
 	for (int64_t i = 0; i < n; i++) {
 		const char *key = gguf_get_key(ctx, i);
+		String keystr = String(key);
+
+		// data too large
+		if (keystr.begins_with("tokenizer.ggml.tokens") ||
+			keystr.begins_with("tokenizer.ggml.token_type") ||
+			keystr.begins_with("tokenizer.ggml.merges")) {
+			continue;
+		}
 
 		const gguf_type type = gguf_get_kv_type(ctx, i);
 
@@ -104,7 +112,7 @@ Ref<Resource> ResourceFormatLoaderLlamaGGUF::load(const String &p_path, const St
 				value = gguf_get_val_bool(ctx, i);
 				break;
 			case GGUF_TYPE_STRING:
-				value = String(gguf_get_val_str(ctx, i));
+				value = String::utf8(gguf_get_val_str(ctx, i));
 				break;
 			case GGUF_TYPE_UINT64:
 				value = gguf_get_val_u64(ctx, i);
@@ -205,7 +213,7 @@ Ref<Resource> ResourceFormatLoaderLlamaGGUF::load(const String &p_path, const St
 							for (int64_t j = 0; j < an; ++j) {
 								const char *s = gguf_get_arr_str(ctx, i, j);
 								if (s) {
-									arr.set(j, String(s));
+									arr.set(j, String::utf8(s));
 								} else {
 									arr.set(j, String());
 								}

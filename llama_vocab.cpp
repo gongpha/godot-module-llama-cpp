@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 
+
 LlamaVocab::LlamaVocab() : vocab(nullptr) {
 }
 
@@ -62,6 +63,7 @@ Error LlamaVocab::init_from_model(LlamaModelInstance *p_model) {
 
 void LlamaVocab::destroy() {
 	vocab = nullptr;
+	utf8_carry.clear();
 }
 
 int32_t LlamaVocab::get_token_count() const {
@@ -93,11 +95,74 @@ double LlamaVocab::get_score(int32_t p_token) const { ERR_FAIL_COND_V(!vocab, 0.
 String LlamaVocab::token_to_piece(int32_t p_token, int32_t p_lstrip, bool p_special) const {
 	ERR_FAIL_COND_V(!vocab, String());
 	ERR_FAIL_COND_V(p_token < 0 || p_token >= get_token_count(), String());
-	
-	char buf[512];
-	int32_t n = llama_token_to_piece(vocab, (llama_token)p_token, buf, (int32_t)sizeof(buf), p_lstrip, p_special);
-	if (n <= 0) return String();
-	return String::utf8(buf, MIN(n, (int32_t)sizeof(buf)));
+
+	int32_t need = llama_token_to_piece(vocab, (llama_token)p_token, nullptr, 0, p_lstrip, p_special);
+	if (need < 0) need = -need; // negative means required size
+	if (need <= 0) return String();
+
+	std::string buf((size_t)need, '\0');
+	int32_t got = llama_token_to_piece(vocab, (llama_token)p_token, buf.data(), need, p_lstrip, p_special);
+	if (got < 0) got = -got;
+	if (got <= 0) return String();
+
+	// our own utf8 handling to avoid cutting sequences and keep partial bytes between calls
+	// kill my time
+
+	if (!utf8_carry.empty()) {
+		utf8_carry.append(buf.data(), (size_t)got);
+		buf.swap(utf8_carry);
+		got = (int32_t)buf.size();
+		utf8_carry.clear();
+	}
+
+	auto valid_prefix_len = [](const char *data, int32_t len) -> int32_t {
+		int32_t i = 0;
+		int32_t last_complete = 0;
+		while (i < len) {
+			unsigned char c = static_cast<unsigned char>(data[i]);
+			int32_t need_bytes = 0;
+			if (c < 0x80) {
+				need_bytes = 1;
+			} else if ((c & 0xE0) == 0xC0) {
+				if (c < 0xC2) break;
+				need_bytes = 2;
+			} else if ((c & 0xF0) == 0xE0) {
+				need_bytes = 3;
+			} else if ((c & 0xF8) == 0xF0) {
+				if (c > 0xF4) break;
+				need_bytes = 4;
+			} else {
+				break;
+			}
+
+			if (i + need_bytes > len) break;
+			for (int j = 1; j < need_bytes; ++j) {
+				if ((static_cast<unsigned char>(data[i + j]) & 0xC0) != 0x80) {
+					return last_complete;
+				}
+			}
+			if (need_bytes == 3) {
+				unsigned char c1 = static_cast<unsigned char>(data[i + 1]);
+				if (c == 0xE0 && (c1 < 0xA0)) break;
+				if (c == 0xED && (c1 >= 0xA0)) break;
+			} else if (need_bytes == 4) {
+				unsigned char c1 = static_cast<unsigned char>(data[i + 1]);
+				if (c == 0xF0 && (c1 < 0x90)) break;
+				if (c == 0xF4 && (c1 > 0x8F)) break;
+			}
+
+			i += need_bytes;
+			last_complete = i;
+		}
+		return last_complete;
+	};
+
+	int32_t prefix = valid_prefix_len(buf.data(), got);
+	String out = String::utf8(buf.c_str(), prefix);
+	if (prefix < got) {
+		utf8_carry.assign(buf.data() + prefix, (size_t)(got - prefix));
+	}
+	return out;
 }
 
 PackedInt32Array LlamaVocab::tokenize(const String &p_text, bool p_add_special, bool p_parse_special) const {

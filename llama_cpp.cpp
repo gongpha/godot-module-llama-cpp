@@ -154,10 +154,10 @@ PackedStringArray LlamaCPP::get_builtin_templates() const {
 }
 
 String LlamaCPP::apply_template(const String &tmpl, const TypedArray<Dictionary> &messages, bool add_assistant) {
-	LocalVector<const char *> roles;
-	roles.reserve(messages.size());
-	LocalVector<const char *> contents;
-	contents.reserve(messages.size());
+	LocalVector<CharString> roles_utf8;
+	roles_utf8.reserve(messages.size());
+	LocalVector<CharString> contents_utf8;
+	contents_utf8.reserve(messages.size());
 	LocalVector<llama_chat_message> msgs;
 	msgs.reserve(messages.size());
 
@@ -167,14 +167,14 @@ String LlamaCPP::apply_template(const String &tmpl, const TypedArray<Dictionary>
 		Dictionary m = messages[i];
 		String role = m.get("role", String("user"));
 		String content = m.get("content", String());
-		roles.push_back(role.utf8().get_data());
-		contents.push_back(content.utf8().get_data());
+		roles_utf8.push_back(role.utf8());
+		contents_utf8.push_back(content.utf8());
 		buf_sz += (size_t)role.length() + (size_t)content.length();
 	}
-	for (size_t i = 0; i < roles.size(); ++i) {
+	for (size_t i = 0; i < roles_utf8.size(); ++i) {
 		llama_chat_message msg;
-		msg.role = roles[i];
-		msg.content = contents[i];
+		msg.role = roles_utf8[i].get_data();
+		msg.content = contents_utf8[i].get_data();
 		msgs.push_back(msg);
 	}
 
