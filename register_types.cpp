@@ -9,6 +9,8 @@
 #include "llama_sampler.h"
 #include "llama_cpp.h"
 #include "llama_gguf.h"
+#include "llama_tool.h"
+#include "llama_tool_callable.h"
 #include "register_types.h"
 
 static LlamaCPP *singleton = nullptr;
@@ -29,6 +31,9 @@ void initialize_llama_module(ModuleInitializationLevel p_level) {
 		register_llama_samplers();
 		
 		ClassDB::register_class<LlamaGGUF>();
+		ClassDB::register_class<LLamaTool>();
+		ClassDB::register_class<LlamaToolLibrary>();
+		ClassDB::register_class<LlamaToolCallable>();
 
 		resource_loader_gguf = memnew(ResourceFormatLoaderLlamaGGUF);
 		ResourceLoader::add_resource_format_loader(resource_loader_gguf);

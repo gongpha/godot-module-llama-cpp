@@ -7,6 +7,10 @@
 #include "core/variant/typed_array.h"
 
 #include "thirdparty/llama/include/llama.h"
+#include "thirdparty/llama/common/json-schema-to-grammar.h"
+#include "llama_tool.h"
+#include <nlohmann/json.hpp>
+#include <string>
 
 LlamaCPP *LlamaCPP::singleton = nullptr;
 
@@ -38,6 +42,8 @@ void LlamaCPP::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_builtin_templates"), &LlamaCPP::get_builtin_templates);
 	ClassDB::bind_method(D_METHOD("apply_template", "template", "messages", "add_assistant"), &LlamaCPP::apply_template);
+	ClassDB::bind_method(D_METHOD("tool_schema_to_grammar", "schema_json", "force_gbnf"), &LlamaCPP::tool_schema_to_grammar, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("tools_to_schema", "tools"), &LlamaCPP::tools_to_schema);
 
 
 	BIND_ENUM_CONSTANT(LOG_LEVEL_NONE);
@@ -197,4 +203,52 @@ String LlamaCPP::apply_template(const String &tmpl, const TypedArray<Dictionary>
 	}
 	out.resize((size_t)written);
 	return String::utf8(out.c_str());
+}
+
+String LlamaCPP::tool_schema_to_grammar(const String &schema_json, bool force_gbnf) const {
+	if (schema_json.is_empty()) return String();
+	nlohmann::ordered_json j;
+	auto parse_result = nlohmann::ordered_json::parse(schema_json.utf8().get_data(), nullptr, false);
+	if (parse_result.is_discarded()) {
+		return String();
+	}
+	j = parse_result;
+	std::string out = json_schema_to_grammar(j, force_gbnf);
+	return String::utf8(out.c_str());
+}
+
+String LlamaCPP::tools_to_schema(const Ref<LlamaToolLibrary> &tools) const {
+	using nlohmann::ordered_json;
+	ordered_json schema;
+	schema["type"] = "object";
+	schema["properties"]["tool_name"]["type"] = "string";
+	schema["properties"]["arguments"]["type"] = "object";
+	schema["required"] = {"tool_name", "arguments"};
+
+	ordered_json tool_names = ordered_json::array();
+	ordered_json mapping;
+	if (tools.is_valid()) {
+		TypedArray<LLamaTool> arr = tools->get_tools();
+		for (int i = 0; i < arr.size(); ++i) {
+			Ref<LLamaTool> t = arr[i];
+			if (!t.is_valid()) continue;
+			const String name = t->get_name();
+			const String schema_str = t->get_json_schema();
+			if (name.is_empty() || schema_str.is_empty()) continue;
+			tool_names.push_back(std::string(name.utf8().get_data()));
+			auto parsed = ordered_json::parse(schema_str.utf8().get_data(), nullptr, false);
+			if (!parsed.is_discarded()) {
+				mapping[std::string(name.utf8().get_data())] = parsed;
+			}
+		}
+	}
+	schema["properties"]["tool_name"]["enum"] = tool_names;
+	schema["properties"]["arguments"]["oneOf"] = ordered_json::array();
+	for (auto it = mapping.begin(); it != mapping.end(); ++it) {
+		ordered_json one;
+		one["title"] = it.key();
+		one.update(it.value());
+		schema["properties"]["arguments"]["oneOf"].push_back(one);
+	}
+	return String::utf8(schema.dump().c_str());
 }

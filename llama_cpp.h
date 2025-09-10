@@ -1,10 +1,13 @@
 #pragma once
 
 #include "core/object/object.h"
+#include "core/object/ref_counted.h"
 #include "core/variant/binder_common.h"
+#include "core/variant/typed_array.h"
 #include "core/string/ustring.h"
 
 #include "thirdparty/llama/include/llama.h"
+class LlamaToolLibrary; // fwd
 
 class LlamaCPP : public Object {
 	GDCLASS(LlamaCPP, Object);
@@ -63,6 +66,12 @@ public:
 
 	PackedStringArray get_builtin_templates() const;
 	String apply_template(const String &tmpl, const TypedArray<Dictionary> &m_messages, bool add_assistant);
+
+	// Tool-calling helpers
+	// Convert a JSON Schema (as String) to a GBNF grammar String using llama.cpp's helper
+	String tool_schema_to_grammar(const String &schema_json, bool force_gbnf = false) const;
+	// Build a JSON Schema from a LlamaToolLibrary (array of tools) for function calling
+	String tools_to_schema(const Ref<LlamaToolLibrary> &tools) const;
 };
 
 VARIANT_ENUM_CAST(LlamaCPP::LogLevel);

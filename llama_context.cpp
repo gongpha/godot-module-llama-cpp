@@ -6,7 +6,6 @@
 #include "core/math/math_defs.h"
 
 #include <string>
-#include <vector>
 
 #include "thirdparty/llama/include/llama.h"
 
@@ -70,10 +69,14 @@ Error LlamaContext::decode(const PackedInt32Array &p_tokens) {
 	ERR_FAIL_COND_V(ctx == nullptr, ERR_UNCONFIGURED);
 	if (p_tokens.is_empty()) return OK;
 
-	std::vector<llama_token> tmp((size_t)p_tokens.size());
-	for (int i = 0; i < p_tokens.size(); ++i) tmp[(size_t)i] = (llama_token)p_tokens[i];
+	// temporary copy to ensure we have a writable pointer
+	llama_token *tokens = memnew_arr(llama_token, p_tokens.size());
+	for (int i = 0; i < p_tokens.size(); i++) {
+		tokens[i] = p_tokens[i];
+	}
 
-	int rc = llama_decode(ctx, llama_batch_get_one(tmp.data(), (int)tmp.size()));
+	int rc = llama_decode(ctx, llama_batch_get_one(tokens, p_tokens.size()));
+	memdelete_arr(tokens);
 	return rc == 0 ? OK : ERR_CANT_ACQUIRE_RESOURCE;
 }
 
