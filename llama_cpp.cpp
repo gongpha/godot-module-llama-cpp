@@ -42,7 +42,7 @@ void LlamaCPP::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_builtin_templates"), &LlamaCPP::get_builtin_templates);
 	ClassDB::bind_method(D_METHOD("apply_template", "template", "messages", "add_assistant"), &LlamaCPP::apply_template);
-	ClassDB::bind_method(D_METHOD("tool_schema_to_grammar", "schema_json", "force_gbnf"), &LlamaCPP::tool_schema_to_grammar, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("convert_json_schema_to_gbnf", "schema_json"), &LlamaCPP::convert_json_schema_to_gbnf);
 	ClassDB::bind_method(D_METHOD("tools_to_schema", "tools"), &LlamaCPP::tools_to_schema);
 
 
@@ -205,7 +205,7 @@ String LlamaCPP::apply_template(const String &tmpl, const TypedArray<Dictionary>
 	return String::utf8(out.c_str());
 }
 
-String LlamaCPP::tool_schema_to_grammar(const String &schema_json, bool force_gbnf) const {
+String LlamaCPP::convert_json_schema_to_gbnf(const String &schema_json) const {
 	if (schema_json.is_empty()) return String();
 	nlohmann::ordered_json j;
 	auto parse_result = nlohmann::ordered_json::parse(schema_json.utf8().get_data(), nullptr, false);
@@ -213,7 +213,7 @@ String LlamaCPP::tool_schema_to_grammar(const String &schema_json, bool force_gb
 		return String();
 	}
 	j = parse_result;
-	std::string out = json_schema_to_grammar(j, force_gbnf);
+	std::string out = json_schema_to_grammar(j, false);
 	return String::utf8(out.c_str());
 }
 
