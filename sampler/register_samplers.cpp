@@ -1,6 +1,7 @@
 #include "core/object/class_db.h"
 
 #include "llama_sampler_greedy.h"
+#include "llama_sampler_dist.h"
 #include "llama_sampler_top_k.h"
 #include "llama_sampler_top_p.h"
 #include "llama_sampler_min_p.h"
@@ -19,6 +20,7 @@
 
 void register_llama_samplers() {
 	ClassDB::register_class<LlamaSamplerGreedy>();
+	ClassDB::register_class<LlamaSamplerDist>();
 	ClassDB::register_class<LlamaSamplerTopK>();
 	ClassDB::register_class<LlamaSamplerTopP>();
 	ClassDB::register_class<LlamaSamplerMinP>();
