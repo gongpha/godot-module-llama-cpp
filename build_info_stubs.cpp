@@ -1,4 +1,3 @@
-#include "llama_define.h"
 #include "thirdparty/llama/common/common.h"
 
 int LLAMA_BUILD_NUMBER = LLAMA_CPP_BUILD_NUMBER;

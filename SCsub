@@ -3,11 +3,41 @@
 from SCons.Script import Environment
 import os
 from SCons.Script import Exit
+import subprocess
 
 Import('env')
 Import("env_modules")
 
 env_llama = env_modules.Clone()
+
+# retrieve macro info
+try:
+	build_number = int(subprocess.check_output(
+		["git", "rev-list", "--count", "HEAD"],
+		cwd="thirdparty/llama",
+		universal_newlines=True
+	).strip())
+except Exception:
+	build_number = 0
+
+try:
+	commit = subprocess.check_output(
+			["git", "rev-parse", "--short=7", "HEAD"],
+			cwd="thirdparty/llama",
+			universal_newlines=True
+	).strip()
+except Exception:
+	commit = "unknown"
+
+print("llama.cpp build number: " + str(build_number) + ", commit: " + commit)
+
+env_llama.Append(CPPDEFINES=[
+	'LLAMA_CPP_BUILD_NUMBER=' + str(build_number),
+	'LLAMA_CPP_VERSION="\\\"' + "b" + str(build_number) + '\\\""',
+	'LLAMA_CPP_COMMIT="\\\"' + commit + '\\\""',
+	'GGML_VERSION="\\\"' + "b" + str(build_number) + '\\\""',
+	'GGML_COMMIT="\\\"' + commit + '\\\""',
+])
 
 # Thirdparty source files
 
@@ -94,7 +124,7 @@ if env["builtin_llama"]:
 		])
 		#env_llama.Append(CPPPATH=['#thirdparty/vulkan/include'])
 
-		if False :
+		if False : # incomplete
 			vulkan_shaders_dir = thirdparty_dir + "ggml/src/ggml-vulkan/vulkan-shaders"
 			gen_src = vulkan_shaders_dir + "/vulkan-shaders-gen.cpp"
 
