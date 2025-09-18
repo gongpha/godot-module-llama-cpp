@@ -24,6 +24,7 @@ public:
 
 	llama_context *get_native() const { return ctx; }
 
+	Error encode(PackedInt32Array p_tokens);
 	Error decode(const PackedInt32Array &p_tokens);
 
 	uint32_t get_n_ctx() const;

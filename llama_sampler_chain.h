@@ -23,6 +23,7 @@ protected:
 public:
 	bool is_valid() const { return chain != nullptr; }
 
+	void copy_from_chain(const llama_sampler *p_chain);
 	PackedInt32Array append_from_chain(const Ref<LlamaSamplerChain> &p_chain);
 
 	void remove(int32_t idx);
@@ -56,6 +57,6 @@ public:
 	void set_samplers_script(const TypedArray<Ref<LlamaSampler>> &p_samplers);
 	TypedArray<Ref<LlamaSampler>> get_samplers_script() const;
 
-	LlamaSamplerChain() = default;
-	~LlamaSamplerChain() = default;
+	LlamaSamplerChain();
+	~LlamaSamplerChain();
 };

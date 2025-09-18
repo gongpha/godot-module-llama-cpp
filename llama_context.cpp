@@ -14,6 +14,7 @@ void LlamaContext::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("destroy"), &LlamaContext::destroy);
 	ClassDB::bind_method(D_METHOD("is_valid"), &LlamaContext::is_valid);
 
+	ClassDB::bind_method(D_METHOD("encode", "tokens"), static_cast<Error (LlamaContext::*)(PackedInt32Array)>(&LlamaContext::encode));
 	ClassDB::bind_method(D_METHOD("decode", "tokens"), &LlamaContext::decode);
 	ClassDB::bind_method(D_METHOD("reset"), &LlamaContext::reset);
 
@@ -63,6 +64,22 @@ void LlamaContext::destroy() {
 		ctx = nullptr;
 	}
 	model_id = ObjectID();
+}
+
+
+Error LlamaContext::encode(PackedInt32Array p_tokens) {
+	ERR_FAIL_COND_V(ctx == nullptr, ERR_UNCONFIGURED);
+	if (p_tokens.is_empty()) return OK;
+
+	// temporary copy to ensure we have a writable pointer
+	llama_token *tokens = memnew_arr(llama_token, p_tokens.size());
+	for (int i = 0; i < p_tokens.size(); i++) {
+		tokens[i] = p_tokens[i];
+	}
+
+	int rc = llama_encode(ctx, llama_batch_get_one(tokens, p_tokens.size()));
+	memdelete_arr(tokens);
+	return rc == 0 ? OK : ERR_CANT_ACQUIRE_RESOURCE;
 }
 
 Error LlamaContext::decode(const PackedInt32Array &p_tokens) {

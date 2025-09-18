@@ -17,6 +17,7 @@
 #include "llama_sampler_logit_bias.h"
 #include "llama_sampler_grammar.h"
 #include "llama_sampler_infill.h"
+#include "llama_sampler_grammar_lazy.h"
 
 void register_llama_samplers() {
 	ClassDB::register_class<LlamaSamplerGreedy>();
@@ -36,4 +37,5 @@ void register_llama_samplers() {
 	ClassDB::register_class<LlamaSamplerLogitBias>();
 	ClassDB::register_class<LlamaSamplerGrammar>();
 	ClassDB::register_class<LlamaSamplerInfill>();
+	ClassDB::register_class<LlamaSamplerGrammarLazyPattern>();
 }

@@ -31,4 +31,8 @@ public:
 	String get_grammar_str() const { return grammar_str; }
 	void set_grammar_root(const String &s) { grammar_root = s; }
 	String get_grammar_root() const { return grammar_root; }
+
+	LlamaSamplerGrammar() {
+		grammar_root = "root";
+	}
 };

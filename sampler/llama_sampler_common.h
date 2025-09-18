@@ -15,6 +15,23 @@ struct llama_sampler * llama_sampler_init_xtc(float p, float t, size_t min_keep,
 struct llama_sampler * llama_sampler_init_mirostat(int32_t n_vocab, uint32_t seed, float tau, float eta, int32_t m);
 struct llama_sampler * llama_sampler_init_mirostat_v2(uint32_t seed, float tau, float eta);
 struct llama_sampler * llama_sampler_init_grammar(const struct llama_vocab * vocab, const char * grammar_str, const char * grammar_root);
+// Lazy grammar variants with triggers
+struct llama_sampler * llama_sampler_init_grammar_lazy(
+	const struct llama_vocab * vocab,
+	const char * grammar_str,
+	const char * grammar_root,
+	const char ** trigger_words,
+	size_t num_trigger_words,
+	const llama_token * trigger_tokens,
+	size_t num_trigger_tokens);
+struct llama_sampler * llama_sampler_init_grammar_lazy_patterns(
+	const struct llama_vocab * vocab,
+	const char * grammar_str,
+	const char * grammar_root,
+	const char ** trigger_patterns,
+	size_t num_trigger_patterns,
+	const llama_token * trigger_tokens,
+	size_t num_trigger_tokens);
 struct llama_sampler * llama_sampler_init_penalties(int32_t penalty_last_n, float penalty_repeat, float penalty_freq, float penalty_present);
 struct llama_sampler * llama_sampler_init_top_n_sigma(float n);
 struct llama_sampler * llama_sampler_init_dry(const struct llama_vocab * vocab, int32_t n_ctx_train, float dry_multiplier, float dry_base, int32_t dry_allowed_length, int32_t dry_penalty_last_n, const char ** seq_breakers, size_t num_breakers);

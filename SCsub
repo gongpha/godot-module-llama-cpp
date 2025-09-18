@@ -48,6 +48,16 @@ env_llama.Append(CPPDEFINES=[
 	'LLAMA_CPP_BUILD_TARGET="\\\"' + env["platform"] + '\\\""',
 ])
 
+# yes. you all know godot had disabled exception handling entirely.
+# BUT llama.cpp and its vendors use it extensively.
+# we can manually disable it by hand. but i would rather kill myself,
+# so i have to enable it here... even though it was dangerous.
+# (im very thankful nlomann json allows me to disable exceptions
+# but my dawg llama.cpp uses them for catching unnecessary json parser error
+# like they're throwing dynamites in a lake for fishes)
+env_llama.Append(CXXFLAGS=["/EHsc"])
+
+
 if env["builtin_llama"]:
 	# Thirdparty source files
 	thirdparty_dir = "thirdparty/llama/"
@@ -161,9 +171,19 @@ if env["builtin_llama"]:
 	env_thirdparty.add_source_files(thirdparty_obj, 'build_info_stubs.cpp')
 
 	common_helpers = [
-		thirdparty_dir + 'common/json-schema-to-grammar.cpp',
-		thirdparty_dir + 'common/log.cpp',
+		thirdparty_dir + 'common/arg.cpp',
+		thirdparty_dir + 'common/chat-parser.cpp',
+		thirdparty_dir + 'common/chat.cpp',
 		thirdparty_dir + 'common/common.cpp',
+		thirdparty_dir + 'common/console.cpp',
+		thirdparty_dir + 'common/json-partial.cpp',
+		thirdparty_dir + 'common/json-schema-to-grammar.cpp',
+		thirdparty_dir + 'common/llguidance.cpp',
+		thirdparty_dir + 'common/log.cpp',
+		thirdparty_dir + 'common/ngram-cache.cpp',
+		thirdparty_dir + 'common/regex-partial.cpp',
+		thirdparty_dir + 'common/sampling.cpp',
+		thirdparty_dir + 'common/speculative.cpp',
 	]
 	env_thirdparty.add_source_files(thirdparty_obj, common_helpers)
 	env.modules_sources += thirdparty_obj
@@ -182,6 +202,7 @@ env_llama.add_source_files(module_obj, 'llama_gguf.cpp')
 env_llama.add_source_files(module_obj, 'llama_tool.cpp')
 env_llama.add_source_files(module_obj, 'llama_tool_callable.cpp')
 env_llama.add_source_files(module_obj, 'llama_model_instance.cpp')
+env_llama.add_source_files(module_obj, 'common/*.cpp')
 env_llama.add_source_files(module_obj, 'register_types.cpp')
 
 env.modules_sources += module_obj

@@ -7,7 +7,6 @@
 #include "core/string/ustring.h"
 
 #include "thirdparty/llama/include/llama.h"
-class LlamaToolLibrary; // fwd
 
 class LlamaCPP : public Object {
 	GDCLASS(LlamaCPP, Object);
@@ -67,7 +66,6 @@ public:
 	PackedStringArray get_builtin_templates() const;
 	String apply_template(const String &tmpl, const TypedArray<Dictionary> &m_messages, bool add_assistant);
 	String convert_json_schema_to_gbnf(const String &schema_json) const;
-	String tools_to_schema(const Ref<LlamaToolLibrary> &tools) const;
 };
 
 VARIANT_ENUM_CAST(LlamaCPP::LogLevel);

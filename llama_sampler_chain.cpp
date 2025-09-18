@@ -41,6 +41,16 @@ void LlamaSamplerChainInstance::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "vocab", PROPERTY_HINT_RESOURCE_TYPE, "LlamaVocab"), "set_vocab", "get_vocab");
 }
 
+void LlamaSamplerChainInstance::copy_from_chain(const llama_sampler *p_chain) {
+	ERR_FAIL_COND(!p_chain);
+
+	if (chain) {
+		llama_sampler_free(chain);
+	}
+
+	chain = llama_sampler_clone(p_chain);
+}
+
 PackedInt32Array LlamaSamplerChainInstance::append_from_chain(const Ref<LlamaSamplerChain> &p_chain) {
 	ERR_FAIL_COND_V(!chain, PackedInt32Array());
 	ERR_FAIL_COND_V(p_chain.is_null(), PackedInt32Array());
@@ -163,4 +173,10 @@ TypedArray<Ref<LlamaSampler>> LlamaSamplerChain::get_samplers_script() const {
 		arr[i] = samplers[i];
 	}
 	return arr;
+}
+
+LlamaSamplerChain::LlamaSamplerChain() {
+}
+
+LlamaSamplerChain::~LlamaSamplerChain() {
 }
