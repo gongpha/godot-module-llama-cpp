@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from SCons.Script import Environment
+from SCons.Script import Action
 import os
 from SCons.Script import Exit
 import subprocess
@@ -58,7 +59,7 @@ env_llama.Append(CPPDEFINES=[
 env_llama.Append(CXXFLAGS=["/EHsc"])
 
 
-if env["builtin_llama"]:
+if True:#env["builtin_llama"]:
 	# Thirdparty source files
 	thirdparty_dir = "thirdparty/llama/"
 
@@ -119,6 +120,107 @@ if env["builtin_llama"]:
 		"src/llama-vocab.cpp",
 		"src/unicode-data.cpp",
 		"src/unicode.cpp",
+
+		# model implementations
+		"src/models/afmoe.cpp",
+		"src/models/apertus.cpp",
+		"src/models/arcee.cpp",
+		"src/models/arctic.cpp",
+		"src/models/arwkv7.cpp",
+		"src/models/baichuan.cpp",
+		"src/models/bailingmoe.cpp",
+		"src/models/bailingmoe2.cpp",
+		"src/models/bert.cpp",
+		"src/models/bitnet.cpp",
+		"src/models/bloom.cpp",
+		"src/models/chameleon.cpp",
+		"src/models/chatglm.cpp",
+		"src/models/codeshell.cpp",
+		"src/models/cogvlm.cpp",
+		"src/models/cohere2-iswa.cpp",
+		"src/models/command-r.cpp",
+		"src/models/dbrx.cpp",
+		"src/models/deci.cpp",
+		"src/models/deepseek.cpp",
+		"src/models/deepseek2.cpp",
+		"src/models/dots1.cpp",
+		"src/models/dream.cpp",
+		"src/models/ernie4-5-moe.cpp",
+		"src/models/ernie4-5.cpp",
+		"src/models/exaone.cpp",
+		"src/models/exaone4.cpp",
+		"src/models/falcon-h1.cpp",
+		"src/models/falcon.cpp",
+		"src/models/gemma-embedding.cpp",
+		"src/models/gemma.cpp",
+		"src/models/gemma2-iswa.cpp",
+		"src/models/gemma3.cpp",
+		"src/models/gemma3n-iswa.cpp",
+		"src/models/glm4-moe.cpp",
+		"src/models/glm4.cpp",
+		"src/models/gpt2.cpp",
+		"src/models/gptneox.cpp",
+		"src/models/granite-hybrid.cpp",
+		"src/models/granite.cpp",
+		"src/models/graph-context-mamba.cpp",
+		"src/models/grok.cpp",
+		"src/models/grovemoe.cpp",
+		"src/models/hunyuan-dense.cpp",
+		"src/models/hunyuan-moe.cpp",
+		"src/models/internlm2.cpp",
+		"src/models/jais.cpp",
+		"src/models/jamba.cpp",
+		"src/models/lfm2.cpp",
+		"src/models/llada-moe.cpp",
+		"src/models/llada.cpp",
+		"src/models/llama-iswa.cpp",
+		"src/models/llama.cpp",
+		"src/models/mamba.cpp",
+		"src/models/minicpm3.cpp",
+		"src/models/minimax-m2.cpp",
+		"src/models/mistral3.cpp",
+		"src/models/mpt.cpp",
+		"src/models/nemotron-h.cpp",
+		"src/models/nemotron.cpp",
+		"src/models/neo-bert.cpp",
+		"src/models/olmo.cpp",
+		"src/models/olmo2.cpp",
+		"src/models/olmoe.cpp",
+		"src/models/openai-moe-iswa.cpp",
+		"src/models/openelm.cpp",
+		"src/models/orion.cpp",
+		"src/models/pangu-embedded.cpp",
+		"src/models/phi2.cpp",
+		"src/models/phi3.cpp",
+		"src/models/plamo.cpp",
+		"src/models/plamo2.cpp",
+		"src/models/plm.cpp",
+		"src/models/qwen.cpp",
+		"src/models/qwen2.cpp",
+		"src/models/qwen2moe.cpp",
+		"src/models/qwen2vl.cpp",
+		"src/models/qwen3.cpp",
+		"src/models/qwen3moe.cpp",
+		"src/models/qwen3next.cpp",
+		"src/models/qwen3vl.cpp",
+		"src/models/qwen3vl-moe.cpp",
+		"src/models/refact.cpp",
+		"src/models/rnd1.cpp",
+		"src/models/rwkv6-base.cpp",
+		"src/models/rwkv6.cpp",
+		"src/models/rwkv6qwen2.cpp",
+		"src/models/rwkv7-base.cpp",
+		"src/models/rwkv7.cpp",
+		"src/models/seed-oss.cpp",
+		"src/models/smallthinker.cpp",
+		"src/models/smollm3.cpp",
+		"src/models/stablelm.cpp",
+		"src/models/starcoder.cpp",
+		"src/models/starcoder2.cpp",
+		"src/models/t5-dec.cpp",
+		"src/models/t5-enc.cpp",
+		"src/models/wavtokenizer-dec.cpp",
+		"src/models/xverse.cpp",
 	]
 
 	env_thirdparty = env_llama.Clone()
@@ -132,31 +234,148 @@ if env["builtin_llama"]:
 		env_thirdparty.Append(CPPDEFINES=[
 			'GGML_USE_VULKAN'
 		])
-		#env_llama.Append(CPPPATH=['#thirdparty/vulkan/include'])
 
-		if False : # incomplete
-			vulkan_shaders_dir = thirdparty_dir + "ggml/src/ggml-vulkan/vulkan-shaders"
-			gen_src = vulkan_shaders_dir + "/vulkan-shaders-gen.cpp"
+		vulkan_dir = thirdparty_dir + "ggml/src/ggml-vulkan/"
+		vulkan_shaders_dir = vulkan_dir + "vulkan-shaders/"
 
+		# check if pre-generated shaders exist
+		pregenerated_cpp = vulkan_dir + "ggml-vulkan-shaders.cpp"
+		pregenerated_hpp = vulkan_dir + "ggml-vulkan-shaders.hpp"
+		has_pregenerated = os.path.exists(pregenerated_cpp) and os.path.exists(pregenerated_hpp)
+
+		# regenerate shaders if requested or if pre-generated files don't exist
+		regenerate_shaders = ARGUMENTS.get('regenerate_vulkan_shaders', 'no') == 'yes' or not has_pregenerated
+
+		if regenerate_shaders:
+			if not has_pregenerated:
+				print("Pre-generated Vulkan shaders not found, will generate...")
+			import shutil
+			import glob
+
+			gen_src = vulkan_shaders_dir + "vulkan-shaders-gen.cpp"
+
+			# create a host tool environment for building the shader generator
 			tool_env = Environment(tools=['default'], ENV=os.environ.copy())
+			tool_env.Append(CXXFLAGS=['/std:c++17', '/EHsc'] if env.msvc else ['-std=c++17', '-pthread'])
+			tool_env.Append(LINKFLAGS=['-pthread'] if env["platform"] != "windows" else [])
 
-			shader_tool = tool_env.Program(target="#bin/vulkan-shaders-gen", source=gen_src)
+			# find glslc compiler (from Vulkan SDK)
+			glslc_path = shutil.which("glslc")
+			if glslc_path is None:
+				vulkan_sdk = os.environ.get("VULKAN_SDK", "")
+				if vulkan_sdk:
+					glslc_path = os.path.join(vulkan_sdk, "Bin", "glslc.exe")
+					if not os.path.exists(glslc_path):
+						glslc_path = os.path.join(vulkan_sdk, "bin", "glslc")
+			if glslc_path is None or not os.path.exists(glslc_path):
+				print("ERROR: glslc not found. Please install Vulkan SDK.")
+				Exit(1)
+			print("Using glslc: " + glslc_path)
 
-			shader_targets = [
-				vulkan_shaders_dir + "/../ggml-vulkan-shaders.hpp",
-				vulkan_shaders_dir + "/../ggml-vulkan-shaders.cpp",
-			]
-			tool_env.Command(
-				shader_targets,
-				shader_tool,
-				'"$SOURCE"',
-				chdir=tool_env.Dir(vulkan_shaders_dir).abspath,
+			# output paths - use bin/gen directory (already gitignored)
+			gen_output_dir = Dir("#bin/gen/vulkan-shaders").abspath
+			spv_output_dir = os.path.join(gen_output_dir, "spv")
+			target_hpp = os.path.join(gen_output_dir, "ggml-vulkan-shaders.hpp")
+			shaders_cwd = Dir(vulkan_shaders_dir).abspath
+
+			# get all shader source files
+			shader_comp_files = glob.glob(os.path.join(shaders_cwd, "*.comp"))
+			shader_glsl_files = glob.glob(os.path.join(shaders_cwd, "*.glsl"))
+
+			# ensure output directory exists
+			os.makedirs(spv_output_dir, exist_ok=True)
+
+			# add generated header include path
+			env_thirdparty.Append(CPPPATH=[gen_output_dir])
+
+			# build the shader generator tool
+			shader_gen_exe = os.path.join(Dir("#bin").abspath, "vulkan-shaders-gen")
+			if env["platform"] == "windows":
+				shader_gen_exe += ".exe"
+
+			shader_tool = tool_env.Program(
+				target=shader_gen_exe,
+				source=[gen_src],
 			)
 
-		thirdparty_sources += [
-			"ggml/src/ggml-vulkan/ggml-vulkan-shaders.cpp",
-			"ggml/src/ggml-vulkan/ggml-vulkan.cpp",
-		]
+			# check if we need to generate shaders (header doesn't exist)
+			need_generate = not os.path.exists(target_hpp)
+
+			# function to generate all shaders
+			def generate_all_shaders(tool_path):
+				# generate header first
+				print("Generating Vulkan shaders header...")
+				cmd = [
+					tool_path,
+					"--glslc", glslc_path,
+					"--output-dir", spv_output_dir,
+					"--target-hpp", target_hpp,
+				]
+				result = subprocess.run(cmd, cwd=shaders_cwd)
+				if result.returncode != 0:
+					print("ERROR: Failed to generate Vulkan shaders header")
+					Exit(1)
+
+				# generate cpp for each shader
+				for shader_file in shader_comp_files:
+					shader_name = os.path.basename(shader_file)
+					target_cpp = os.path.join(gen_output_dir, shader_name + ".cpp")
+					print(f"Generating {shader_name}.cpp...")
+					cmd = [
+						tool_path,
+						"--glslc", glslc_path,
+						"--source", shader_file,
+						"--output-dir", spv_output_dir,
+						"--target-hpp", target_hpp,
+						"--target-cpp", target_cpp,
+					]
+					result = subprocess.run(cmd, cwd=shaders_cwd)
+					if result.returncode != 0:
+						print(f"ERROR: Failed to generate {shader_name}.cpp")
+						Exit(1)
+
+			# if shaders don't exist and the tool already exists, generate now
+			if need_generate and os.path.exists(shader_gen_exe):
+				print("Generating Vulkan shaders now (tool already exists)...")
+				generate_all_shaders(shader_gen_exe)
+
+			# action for Command to run after tool is built
+			def run_shader_gen_action(target, source, env):
+				tool_path = source[0].abspath
+				generate_all_shaders(tool_path)
+				# touch the stamp file
+				with open(str(target[0]), 'w') as f:
+					f.write("generated")
+				return 0
+
+			# create a stamp file target to trigger shader generation
+			shader_gen_stamp = os.path.join(gen_output_dir, ".shader_gen_stamp")
+
+			# only run Command if we still need to generate
+			if need_generate:
+				shader_gen_cmd = env.Command(
+					target=shader_gen_stamp,
+					source=[shader_tool[0]] + shader_comp_files + shader_glsl_files,
+					action=Action(run_shader_gen_action, "Generating Vulkan shaders..."),
+				)
+				# make sure this runs before anything else
+				env.Depends(thirdparty_obj, shader_gen_cmd)
+
+			# add ggml-vulkan.cpp from source dir
+			thirdparty_sources += ["ggml/src/ggml-vulkan/ggml-vulkan.cpp"]
+
+			# add generated cpp files directly with absolute paths
+			for shader_file in shader_comp_files:
+				shader_name = os.path.basename(shader_file)
+				shader_cpp = os.path.join(gen_output_dir, shader_name + ".cpp")
+				env_thirdparty.add_source_files(thirdparty_obj, [shader_cpp])
+
+		else:
+			# use pre-generated shader files
+			thirdparty_sources += [
+				"ggml/src/ggml-vulkan/ggml-vulkan-shaders.cpp",
+				"ggml/src/ggml-vulkan/ggml-vulkan.cpp",
+			]
 
 	thirdparty_sources = [thirdparty_dir + file for file in thirdparty_sources]
 
@@ -173,17 +392,23 @@ if env["builtin_llama"]:
 	common_helpers = [
 		thirdparty_dir + 'common/arg.cpp',
 		thirdparty_dir + 'common/chat-parser.cpp',
+		thirdparty_dir + 'common/chat-parser-xml-toolcall.cpp',
+		thirdparty_dir + 'common/chat-peg-parser.cpp',
 		thirdparty_dir + 'common/chat.cpp',
 		thirdparty_dir + 'common/common.cpp',
 		thirdparty_dir + 'common/console.cpp',
+		thirdparty_dir + 'common/download.cpp',
 		thirdparty_dir + 'common/json-partial.cpp',
 		thirdparty_dir + 'common/json-schema-to-grammar.cpp',
 		thirdparty_dir + 'common/llguidance.cpp',
 		thirdparty_dir + 'common/log.cpp',
 		thirdparty_dir + 'common/ngram-cache.cpp',
+		thirdparty_dir + 'common/peg-parser.cpp',
+		thirdparty_dir + 'common/preset.cpp',
 		thirdparty_dir + 'common/regex-partial.cpp',
 		thirdparty_dir + 'common/sampling.cpp',
 		thirdparty_dir + 'common/speculative.cpp',
+		thirdparty_dir + 'common/unicode.cpp',
 	]
 	env_thirdparty.add_source_files(thirdparty_obj, common_helpers)
 	env.modules_sources += thirdparty_obj
