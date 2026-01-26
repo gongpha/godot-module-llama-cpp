@@ -49,6 +49,11 @@ env_llama.Append(CPPDEFINES=[
 	'LLAMA_CPP_BUILD_TARGET="\\\"' + env["platform"] + '\\\""',
 ])
 
+if env["platform"] == "linuxbsd":
+	env_llama.Append(CPPDEFINES=[
+		'_GNU_SOURCE',
+	])
+
 # yes. you all know godot had disabled exception handling entirely.
 # BUT llama.cpp and its vendors use it extensively.
 # we can manually disable it by hand. but i would rather kill myself,
@@ -56,7 +61,10 @@ env_llama.Append(CPPDEFINES=[
 # (im very thankful nlomann json allows me to disable exceptions
 # but my dawg llama.cpp uses them for catching unnecessary json parser error
 # like they're throwing dynamites in a lake for fishes)
-env_llama.Append(CXXFLAGS=["/EHsc"])
+if env.msvc:
+	env_llama.Append(CXXFLAGS=["/EHsc"])
+else:
+	env_llama.Append(CXXFLAGS=["-fexceptions"])
 
 
 if True:#env["builtin_llama"]:
@@ -380,7 +388,7 @@ if True:#env["builtin_llama"]:
 	thirdparty_sources = [thirdparty_dir + file for file in thirdparty_sources]
 
 	env_thirdparty.Append(CPPDEFINES=['GGML_USE_CPU'])
-	
+
 	env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sources)
 
 	env_thirdparty.add_source_files(thirdparty_obj, 'arch/*.cpp')
