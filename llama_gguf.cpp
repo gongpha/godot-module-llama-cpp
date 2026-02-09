@@ -220,9 +220,17 @@ Ref<Resource> ResourceFormatLoaderLlamaGGUF::load(const String &p_path, const St
 							}
 							value = arr;
 						} break;
+						default: {
+							// unsupported array type
+							value = Variant();
+						}
 					}
 					break;
 				}
+			default:
+				// unsupported type
+				value = Variant();
+				break;
 		}
 		res->metadata[key] = value;
 	}

@@ -38,7 +38,7 @@ PackedInt32Array LlamaCommon::tokenize_from_context(const Ref<LlamaContext> &p_c
 	PackedInt32Array result;
 	std::vector<int32_t> tokens = common_tokenize(p_context->get_native(), p_text.utf8().get_data(), p_add_special, p_parse_special);
 	result.resize(tokens.size());
-	for (int i = 0; i < tokens.size(); ++i) {
+	for (size_t i = 0; i < tokens.size(); ++i) {
 		result.set(i, tokens[i]);
 	}
 	return result;
@@ -49,7 +49,7 @@ PackedInt32Array LlamaCommon::tokenize(const Ref<LlamaVocab> &p_vocab, const Str
 	PackedInt32Array result;
 	std::vector<int32_t> tokens = common_tokenize(p_vocab->get_ptr(), p_text.utf8().get_data(), p_add_special, p_parse_special);
 	result.resize(tokens.size());
-	for (int i = 0; i < tokens.size(); ++i) {
+	for (size_t i = 0; i < tokens.size(); ++i) {
 		result.set(i, tokens[i]);
 	}
 	return result;

@@ -235,13 +235,13 @@ if True:#env["builtin_llama"]:
 	env_thirdparty.disable_warnings()
 
 	if env["vulkan"]:
-		if env.get("use_volk", False):
-			print("using volk and llama.cpp with vulkan support is not supported at the time")
-			Exit(1)
-
 		env_thirdparty.Append(CPPDEFINES=[
-			'GGML_USE_VULKAN'
+			'GGML_USE_VULKAN',
+			'VK_NO_PROTOTYPES'
 		])
+		
+		if env.get("use_volk", False):
+			env_thirdparty.Append(CPPDEFINES=["USE_VOLK"])
 
 		vulkan_dir = thirdparty_dir + "ggml/src/ggml-vulkan/"
 		vulkan_shaders_dir = vulkan_dir + "vulkan-shaders/"
@@ -370,7 +370,7 @@ if True:#env["builtin_llama"]:
 				env.Depends(thirdparty_obj, shader_gen_cmd)
 
 			# add ggml-vulkan.cpp from source dir
-			thirdparty_sources += ["ggml/src/ggml-vulkan/ggml-vulkan.cpp"]
+			thirdparty_sources += ["../../ggml_vulkan_stub.cpp"]
 
 			# add generated cpp files directly with absolute paths
 			for shader_file in shader_comp_files:
@@ -382,8 +382,9 @@ if True:#env["builtin_llama"]:
 			# use pre-generated shader files
 			thirdparty_sources += [
 				"ggml/src/ggml-vulkan/ggml-vulkan-shaders.cpp",
-				"ggml/src/ggml-vulkan/ggml-vulkan.cpp",
+				"../../ggml_vulkan_stub.cpp",
 			]
+
 
 	thirdparty_sources = [thirdparty_dir + file for file in thirdparty_sources]
 
@@ -396,6 +397,14 @@ if True:#env["builtin_llama"]:
 	env_thirdparty.add_source_files(thirdparty_obj, 'ggml_core_c.c')
 	env_thirdparty.add_source_files(thirdparty_obj, 'ggml_cpu_core_c.c')
 	env_thirdparty.add_source_files(thirdparty_obj, 'build_info_stubs.cpp')
+
+	# remove -Werror flag for thirdparty code to avoid build failures when compiling with gcc/clang and dev_mode=true (godot scons)
+	if not env.msvc:
+		if "-Werror" in env_thirdparty["CFLAGS"]:
+			env_thirdparty["CFLAGS"].remove("-Werror")
+		if "-Werror" in env_thirdparty["CXXFLAGS"]:
+			env_thirdparty["CXXFLAGS"].remove("-Werror")
+
 
 	common_helpers = [
 		thirdparty_dir + 'common/arg.cpp',
@@ -424,6 +433,16 @@ if True:#env["builtin_llama"]:
 # Godot source files
 
 module_obj = []
+
+if not env.msvc:
+	if "-Werror" in env_llama["CFLAGS"]:
+		env_llama["CFLAGS"].remove("-Werror")
+	if "-Werror" in env_llama["CXXFLAGS"]:
+		env_llama["CXXFLAGS"].remove("-Werror")
+	if "-Werror" in env_llama["CCFLAGS"]:
+		env_llama["CCFLAGS"].remove("-Werror")
+
+	env_llama.Append(CCFLAGS=["-Wno-error"])
 
 env_llama.add_source_files(module_obj, 'llama_context.cpp')
 env_llama.add_source_files(module_obj, 'llama_vocab.cpp')
