@@ -262,11 +262,6 @@ if True:#env["builtin_llama"]:
 
 			gen_src = vulkan_shaders_dir + "vulkan-shaders-gen.cpp"
 
-			# create a host tool environment for building the shader generator
-			tool_env = Environment(tools=['default'], ENV=os.environ.copy())
-			tool_env.Append(CXXFLAGS=['/std:c++17', '/EHsc'] if env.msvc else ['-std=c++17', '-pthread'])
-			tool_env.Append(LINKFLAGS=['-pthread'] if env["platform"] != "windows" else [])
-
 			# find glslc compiler (from Vulkan SDK)
 			glslc_path = shutil.which("glslc")
 			if glslc_path is None:
@@ -288,7 +283,6 @@ if True:#env["builtin_llama"]:
 
 			# get all shader source files
 			shader_comp_files = glob.glob(os.path.join(shaders_cwd, "*.comp"))
-			shader_glsl_files = glob.glob(os.path.join(shaders_cwd, "*.glsl"))
 
 			# ensure output directory exists
 			os.makedirs(spv_output_dir, exist_ok=True)
@@ -296,18 +290,23 @@ if True:#env["builtin_llama"]:
 			# add generated header include path
 			env_thirdparty.Append(CPPPATH=[gen_output_dir])
 
-			# build the shader generator tool
+			# build the shader generator tool synchronously with subprocess
 			shader_gen_exe = os.path.join(Dir("#bin").abspath, "vulkan-shaders-gen")
 			if env["platform"] == "windows":
 				shader_gen_exe += ".exe"
 
-			shader_tool = tool_env.Program(
-				target=shader_gen_exe,
-				source=[gen_src],
-			)
+			# check if we need to generate shaders
+			def check_need_generate():
+				if not os.path.exists(target_hpp):
+					return True
+				for shader_file in shader_comp_files:
+					shader_name = os.path.basename(shader_file)
+					target_cpp = os.path.join(gen_output_dir, shader_name + ".cpp")
+					if not os.path.exists(target_cpp):
+						return True
+				return False
 
-			# check if we need to generate shaders (header doesn't exist)
-			need_generate = not os.path.exists(target_hpp)
+			need_generate = check_need_generate()
 
 			# function to generate all shaders
 			def generate_all_shaders(tool_path):
@@ -315,20 +314,19 @@ if True:#env["builtin_llama"]:
 				print("Generating Vulkan shaders header...")
 				cmd = [
 					tool_path,
-					"--glslc", glslc_path,
 					"--output-dir", spv_output_dir,
 					"--target-hpp", target_hpp,
 				]
 				result = subprocess.run(cmd, cwd=shaders_cwd)
 				if result.returncode != 0:
 					print("ERROR: Failed to generate Vulkan shaders header")
-					Exit(1)
+					return False
 
 				# generate cpp for each shader
 				for shader_file in shader_comp_files:
 					shader_name = os.path.basename(shader_file)
 					target_cpp = os.path.join(gen_output_dir, shader_name + ".cpp")
-					print(f"Generating {shader_name}.cpp...")
+					print(f"Compiling shader: {shader_name}")
 					cmd = [
 						tool_path,
 						"--glslc", glslc_path,
@@ -339,35 +337,33 @@ if True:#env["builtin_llama"]:
 					]
 					result = subprocess.run(cmd, cwd=shaders_cwd)
 					if result.returncode != 0:
-						print(f"ERROR: Failed to generate {shader_name}.cpp")
-						Exit(1)
+						print(f"ERROR: Failed to compile shader: {shader_name}")
+						return False
+				print("Vulkan shaders generated successfully!")
+				return True
 
-			# if shaders don't exist and the tool already exists, generate now
-			if need_generate and os.path.exists(shader_gen_exe):
-				print("Generating Vulkan shaders now (tool already exists)...")
-				generate_all_shaders(shader_gen_exe)
+			# Build the shader generator tool synchronously if needed
+			if need_generate and not os.path.exists(shader_gen_exe):
+				print("Building vulkan-shaders-gen tool...")
+				gen_src_abs = os.path.abspath(gen_src)
+				if env.msvc:
+					compile_cmd = ["cl", "/std:c++17", "/EHsc", gen_src_abs, "/Fe:" + shader_gen_exe]
+				else:
+					compile_cmd = ["g++", "-o", shader_gen_exe, "-std=c++17", "-pthread", gen_src_abs]
 
-			# action for Command to run after tool is built
-			def run_shader_gen_action(target, source, env):
-				tool_path = source[0].abspath
-				generate_all_shaders(tool_path)
-				# touch the stamp file
-				with open(str(target[0]), 'w') as f:
-					f.write("generated")
-				return 0
+				print("Compiling shader generator: " + " ".join(compile_cmd))
+				result = subprocess.run(compile_cmd)
+				if result.returncode != 0:
+					print("ERROR: Failed to compile vulkan-shaders-gen")
+					Exit(1)
 
-			# create a stamp file target to trigger shader generation
-			shader_gen_stamp = os.path.join(gen_output_dir, ".shader_gen_stamp")
-
-			# only run Command if we still need to generate
+			# Generate shaders synchronously if needed
 			if need_generate:
-				shader_gen_cmd = env.Command(
-					target=shader_gen_stamp,
-					source=[shader_tool[0]] + shader_comp_files + shader_glsl_files,
-					action=Action(run_shader_gen_action, "Generating Vulkan shaders..."),
-				)
-				# make sure this runs before anything else
-				env.Depends(thirdparty_obj, shader_gen_cmd)
+				if not os.path.exists(shader_gen_exe):
+					print("ERROR: vulkan-shaders-gen not found at: " + shader_gen_exe)
+					Exit(1)
+				if not generate_all_shaders(shader_gen_exe):
+					Exit(1)
 
 			# add ggml-vulkan.cpp from source dir
 			thirdparty_sources += ["../../ggml_vulkan_stub.cpp"]
