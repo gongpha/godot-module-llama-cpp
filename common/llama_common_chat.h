@@ -58,15 +58,15 @@ VARIANT_ENUM_CAST(LlamaCommonChat::ChatFormat);
 class LlamaCommonChatSyntax : public RefCounted {
 	GDCLASS(LlamaCommonChatSyntax, RefCounted);
 
-	common_chat_syntax m_syntax;
+	common_chat_parser_params m_syntax;
 
 protected:
 	static void _bind_methods();
 
 public:
 
-	void set_syntax(const common_chat_syntax &p_syntax);
-	common_chat_syntax get_syntax() const;
+	void set_syntax(const common_chat_parser_params &p_syntax);
+	common_chat_parser_params get_syntax() const;
 
 	void set_format(LlamaCommonChat::ChatFormat p_format);
 	LlamaCommonChat::ChatFormat get_format() const;

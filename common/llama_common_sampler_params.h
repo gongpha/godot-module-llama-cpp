@@ -12,6 +12,8 @@ class LlamaCommonSamplerParams : public Resource {
 
 	common_params_sampling params;
 
+	friend class LlamaCommonSampler;
+
 protected:
 	static void _bind_methods();
 

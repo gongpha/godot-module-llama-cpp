@@ -38,7 +38,12 @@ Ref<LlamaCommonChatTemplates> LlamaCommonChatTemplates::init(
 
 bool LlamaCommonChatTemplates::was_explicit() const { return ptr ? common_chat_templates_was_explicit(ptr.get()) : false; }
 
-String LlamaCommonChatTemplates::get_source(const String &variant) const { return ptr ? String(common_chat_templates_source(ptr.get(), variant.is_empty() ? nullptr : variant.utf8().get_data())) : String(); }
+String LlamaCommonChatTemplates::get_source(const String &variant) const {
+	if (!ptr) {
+		return String();
+	}
+	return String(common_chat_templates_source(ptr.get(), variant.is_empty() ? nullptr : variant.utf8().get_data()).c_str());
+}
 
 Ref<LlamaCommonChatParameters> LlamaCommonChatTemplates::apply(const Ref<LlamaCommonChatTemplatesInput> &inputs) const {
 	ERR_FAIL_COND_V(!inputs.is_valid(), Ref<LlamaCommonChatParameters>());

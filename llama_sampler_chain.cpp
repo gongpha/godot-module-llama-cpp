@@ -6,7 +6,7 @@
 #include "core/error/error_macros.h"
 
 #include "thirdparty/llama/include/llama.h"
-#include "thirdparty/llama/src/llama-sampling.h"
+#include "thirdparty/llama/src/llama-sampler.h"
 
 #include <vector>
 #include <string>

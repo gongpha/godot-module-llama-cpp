@@ -167,7 +167,7 @@ Ref<LlamaCommonChatMessages> LlamaCommonChatMessages::create_from_dictionaries_o
 	using json = nlohmann::ordered_json;
 	json arr = json::array();
 	for (int i = 0; i < p_dicts.size(); ++i) arr.push_back(godot_variant_to_nlohmann_json(p_dicts[i]));
-	auto msgs = common_chat_msgs_parse_oaicompat<json>(arr);
+	auto msgs = common_chat_msgs_parse_oaicompat(arr);
 	return from_std_vector(msgs);
 }
 
@@ -177,7 +177,7 @@ TypedArray<Dictionary> LlamaCommonChatMessages::to_dictionaries_oaicompat(bool c
 	msgs.reserve(messages.size());
 	for (uint32_t i = 0; i < messages.size(); ++i)
 		msgs.push_back(messages[i]);
-	json j = common_chat_msgs_to_json_oaicompat<json>(msgs, concat_typed_text);
+	json j = common_chat_msgs_to_json_oaicompat(msgs, concat_typed_text);
 	TypedArray<Dictionary> out;
 	for (const auto &el : j)
 		out.push_back(nlohmann_json_to_godot_variant(el));

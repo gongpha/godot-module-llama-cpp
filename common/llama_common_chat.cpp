@@ -66,10 +66,10 @@ void LlamaCommonChatSyntax::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "parse_tool_calls"), "set_parse_tool_calls", "get_parse_tool_calls");
 }
 
-void LlamaCommonChatSyntax::set_syntax(const common_chat_syntax &p_syntax) {
+void LlamaCommonChatSyntax::set_syntax(const common_chat_parser_params &p_syntax) {
 	m_syntax = p_syntax;
 }
-common_chat_syntax LlamaCommonChatSyntax::get_syntax() const {
+common_chat_parser_params LlamaCommonChatSyntax::get_syntax() const {
 	return m_syntax;
 }
 

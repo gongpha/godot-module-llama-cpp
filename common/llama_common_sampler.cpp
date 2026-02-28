@@ -45,7 +45,7 @@ void LlamaCommonSampler::init(const LlamaModelInstance *p_model, const Ref<Llama
 
 	const llama_model *model =  p_model ? p_model->get_model_ptr() : nullptr;
 	ERR_FAIL_COND_MSG(!model, "Invalid model instance provided.");
-	gsmpl = common_sampler_init(model, p_params->get_params());
+	gsmpl = common_sampler_init(model, p_params->params);
 }
 
 void LlamaCommonSampler::free() {

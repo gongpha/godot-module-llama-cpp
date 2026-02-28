@@ -104,7 +104,7 @@ bool LlamaCommonChatMessage::is_empty() const {
 
 Dictionary LlamaCommonChatMessage::to_dictionary_oaicompat() const {
 	using json = nlohmann::ordered_json;
-	json j = m_msg.to_json_oaicompat<json>();
+	json j = m_msg.to_json_oaicompat();
 	return nlohmann_json_to_godot_variant(j);
 }
 
@@ -231,7 +231,7 @@ Ref<LlamaCommonChatMessageDiff> LlamaCommonChatMessageDiff::create_from_dictiona
 
 LlamaCommonJSON LlamaCommonChatMessageDiff::to_dictionary_oaicompat() const {
 	using json = nlohmann::ordered_json;
-	json j = common_chat_msg_diff_to_json_oaicompat<json>(m_msg_diff);
+	json j = common_chat_msg_diff_to_json_oaicompat(m_msg_diff);
 	return nlohmann_json_to_godot_variant(j);
 }
 
