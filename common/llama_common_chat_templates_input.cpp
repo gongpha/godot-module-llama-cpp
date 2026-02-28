@@ -62,6 +62,8 @@ void LlamaCommonChatTemplatesInput::set_messages(const Ref<LlamaCommonChatMessag
 	inputs.messages = p_messages->get_messages_as_std_vector();
 }
 Ref<LlamaCommonChatMessages> LlamaCommonChatTemplatesInput::get_messages() const {
+	if (inputs.messages.empty())
+		return Ref<LlamaCommonChatMessages>();
 	return LlamaCommonChatMessages::from_std_vector(inputs.messages);
 }
 

@@ -1,10 +1,11 @@
 #pragma once
 
+#include "core/object/class_db.h"
 #include "core/object/ref_counted.h"
 #include "core/string/ustring.h"
-#include "core/variant/typed_array.h"
 #include "thirdparty/llama/include/llama.h"
 #include <string>
+
 class LlamaModelInstance;
 struct llama_vocab;
 
@@ -17,7 +18,7 @@ class LlamaVocab : public RefCounted {
 
 public:
 
-	enum VocabType : int {
+	enum VocabType {
 		VOCAB_TYPE_NONE   = LLAMA_VOCAB_TYPE_NONE,
 		VOCAB_TYPE_SPM    = LLAMA_VOCAB_TYPE_SPM,
 		VOCAB_TYPE_BPE    = LLAMA_VOCAB_TYPE_BPE,
@@ -67,4 +68,4 @@ public:
 	~LlamaVocab();
 };
 
-VARIANT_ENUM_CAST(LlamaVocab::VocabType);
+VARIANT_ENUM_CAST(LlamaVocab::VocabType)
