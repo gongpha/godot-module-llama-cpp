@@ -2,6 +2,7 @@
 
 #include "core/io/file_access.h"
 #include "core/config/project_settings.h"
+#include "core/object/class_db.h"
 
 #include "thirdparty/llama/ggml/include/gguf.h"
 

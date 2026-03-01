@@ -4,7 +4,7 @@
 #include "core/io/file_access.h"
 
 #include "thirdparty/llama/include/llama.h"
-#include "core/config/project_settings.h"
+#include "core/object/class_db.h"
 
 #include "llama_cpp.h"
 
