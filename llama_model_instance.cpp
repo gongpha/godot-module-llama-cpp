@@ -4,6 +4,7 @@
 #include "core/io/file_access.h"
 
 #include "thirdparty/llama/include/llama.h"
+#include "core/object/callable_mp.h"
 #include "core/object/class_db.h"
 
 #include "llama_cpp.h"
