@@ -19,6 +19,7 @@ public:
 	void set_gguf_path(const String &p_path) { path = p_path; }
 	String get_gguf_path() const { return path; }
 
+	void set_metadata(const Dictionary &p_metadata) { metadata = p_metadata; }
 	Dictionary get_metadata() const { return metadata; }
 
 	String get_architecture() const { return metadata.get("general.architecture", ""); }

@@ -11,6 +11,7 @@ void LlamaGGUF::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_gguf_path"), &LlamaGGUF::get_gguf_path);
 
 	ClassDB::bind_method(D_METHOD("get_metadata"), &LlamaGGUF::get_metadata);
+	ClassDB::bind_method(D_METHOD("set_metadata"), &LlamaGGUF::set_metadata);
 
 	ClassDB::bind_method(D_METHOD("get_architecture"), &LlamaGGUF::get_architecture);
 	ClassDB::bind_method(D_METHOD("get_model_name"), &LlamaGGUF::get_model_name);
@@ -32,7 +33,7 @@ void LlamaGGUF::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_tokenizer_add_bos"), &LlamaGGUF::get_tokenizer_add_bos);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "gguf_path", PROPERTY_HINT_FILE, "*.gguf", PROPERTY_USAGE_NO_EDITOR), "set_gguf_path", "get_gguf_path");
-	ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "metadata"), "", "get_metadata");
+	ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "metadata"), "set_metadata", "get_metadata");
 }
 
 void ResourceFormatLoaderLlamaGGUF::get_recognized_extensions(List<String> *p_extensions) const {
