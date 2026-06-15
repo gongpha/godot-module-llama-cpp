@@ -16,8 +16,6 @@ void LlamaCommonChatParameters::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_grammar"), &LlamaCommonChatParameters::get_grammar);
 	ClassDB::bind_method(D_METHOD("set_grammar_lazy", "lazy"), &LlamaCommonChatParameters::set_grammar_lazy);
 	ClassDB::bind_method(D_METHOD("get_grammar_lazy"), &LlamaCommonChatParameters::get_grammar_lazy);
-	ClassDB::bind_method(D_METHOD("set_thinking_forced_open", "forced"), &LlamaCommonChatParameters::set_thinking_forced_open);
-	ClassDB::bind_method(D_METHOD("get_thinking_forced_open"), &LlamaCommonChatParameters::get_thinking_forced_open);
 	ClassDB::bind_method(D_METHOD("set_grammar_triggers", "triggers"), &LlamaCommonChatParameters::set_grammar_triggers);
 	ClassDB::bind_method(D_METHOD("get_grammar_triggers"), &LlamaCommonChatParameters::get_grammar_triggers);
 	ClassDB::bind_method(D_METHOD("set_preserved_tokens", "tokens"), &LlamaCommonChatParameters::set_preserved_tokens);
@@ -29,7 +27,6 @@ void LlamaCommonChatParameters::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "prompt"), "set_prompt", "get_prompt");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "grammar"), "set_grammar", "get_grammar");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "grammar_lazy"), "set_grammar_lazy", "get_grammar_lazy");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "thinking_forced_open"), "set_thinking_forced_open", "get_thinking_forced_open");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "grammar_triggers"), "set_grammar_triggers", "get_grammar_triggers");
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_STRING_ARRAY, "preserved_tokens"), "set_preserved_tokens", "get_preserved_tokens");
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_STRING_ARRAY, "additional_stops"), "set_additional_stops", "get_additional_stops");
@@ -53,9 +50,6 @@ String LlamaCommonChatParameters::get_grammar() const { return String::utf8(para
 
 void LlamaCommonChatParameters::set_grammar_lazy(bool p_lazy) { params.grammar_lazy = p_lazy; }
 bool LlamaCommonChatParameters::get_grammar_lazy() const { return params.grammar_lazy; }
-
-void LlamaCommonChatParameters::set_thinking_forced_open(bool p_forced) { params.thinking_forced_open = p_forced; }
-bool LlamaCommonChatParameters::get_thinking_forced_open() const { return params.thinking_forced_open; }
 
 void LlamaCommonChatParameters::set_grammar_triggers(const TypedArray<LlamaCommonGrammarTrigger> &p_triggers) {
 	params.grammar_triggers.clear();

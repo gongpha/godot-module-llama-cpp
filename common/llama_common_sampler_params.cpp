@@ -201,8 +201,15 @@ PackedInt32Array LlamaCommonSamplerParams::get_samplers() const{
 	PackedInt32Array out; for (auto &t : params.samplers) out.push_back((int32_t)t); return out;
 }
 
-void LlamaCommonSamplerParams::set_grammar(const String &s){ params.grammar = s.utf8().get_data(); }
-String LlamaCommonSamplerParams::get_grammar() const{ return String::utf8(params.grammar.c_str()); }
+void LlamaCommonSamplerParams::set_grammar(const String &s){
+	std::string str = s.utf8().get_data();
+	if (str.empty()) {
+		params.grammar = common_grammar();
+	} else {
+		params.grammar = common_grammar(COMMON_GRAMMAR_TYPE_USER, str);
+	}
+}
+String LlamaCommonSamplerParams::get_grammar() const{ return String::utf8(params.grammar.grammar.c_str()); }
 
 void LlamaCommonSamplerParams::set_grammar_lazy(bool v){ params.grammar_lazy = v; }
 bool LlamaCommonSamplerParams::get_grammar_lazy() const{ return params.grammar_lazy; }

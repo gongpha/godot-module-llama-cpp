@@ -231,7 +231,32 @@ Ref<LlamaCommonChatMessageDiff> LlamaCommonChatMessageDiff::create_from_dictiona
 
 LlamaCommonJSON LlamaCommonChatMessageDiff::to_dictionary_oaicompat() const {
 	using json = nlohmann::ordered_json;
-	json j = common_chat_msg_diff_to_json_oaicompat(m_msg_diff);
+	json j = json::object();
+	if (!m_msg_diff.reasoning_content_delta.empty()) {
+		j["reasoning_content"] = m_msg_diff.reasoning_content_delta;
+	}
+	if (!m_msg_diff.content_delta.empty()) {
+		j["content"] = m_msg_diff.content_delta;
+	}
+	if (m_msg_diff.tool_call_index != std::string::npos) {
+		json tc = json::object();
+		tc["index"] = m_msg_diff.tool_call_index;
+		if (!m_msg_diff.tool_call_delta.id.empty()) {
+			tc["id"] = m_msg_diff.tool_call_delta.id;
+		}
+		json fn = json::object();
+		if (!m_msg_diff.tool_call_delta.name.empty()) {
+			fn["name"] = m_msg_diff.tool_call_delta.name;
+		}
+		if (!m_msg_diff.tool_call_delta.arguments.empty()) {
+			fn["arguments"] = m_msg_diff.tool_call_delta.arguments;
+		}
+		if (!fn.empty()) {
+			tc["function"] = fn;
+			tc["type"] = "function";
+		}
+		j["tool_calls"] = json::array({tc});
+	}
 	return nlohmann_json_to_godot_variant(j);
 }
 

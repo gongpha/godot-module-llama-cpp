@@ -54,15 +54,15 @@ void LlamaCommonChatSyntax::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_reasoning_format"), &LlamaCommonChatSyntax::get_reasoning_format);
 	ClassDB::bind_method(D_METHOD("set_reasoning_in_content", "in_content"), &LlamaCommonChatSyntax::set_reasoning_in_content);
 	ClassDB::bind_method(D_METHOD("get_reasoning_in_content"), &LlamaCommonChatSyntax::get_reasoning_in_content);
-	ClassDB::bind_method(D_METHOD("set_thinking_forced_open", "forced"), &LlamaCommonChatSyntax::set_thinking_forced_open);
-	ClassDB::bind_method(D_METHOD("get_thinking_forced_open"), &LlamaCommonChatSyntax::get_thinking_forced_open);
+	ClassDB::bind_method(D_METHOD("set_generation_prompt", "prompt"), &LlamaCommonChatSyntax::set_generation_prompt);
+	ClassDB::bind_method(D_METHOD("get_generation_prompt"), &LlamaCommonChatSyntax::get_generation_prompt);
 	ClassDB::bind_method(D_METHOD("set_parse_tool_calls", "parse"), &LlamaCommonChatSyntax::set_parse_tool_calls);
 	ClassDB::bind_method(D_METHOD("get_parse_tool_calls"), &LlamaCommonChatSyntax::get_parse_tool_calls);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "format", PROPERTY_HINT_ENUM, "CONTENT_ONLY,GENERIC,MISTRAL_NEMO,LLAMA_3_X,LLAMA_3_X_WITH_BUILTIN_TOOLS,DEEPSEEK_R1,FIREFUNCTION_V2,FUNCTIONARY_V3_2,FUNCTIONARY_V3_1_LLAMA_3_1,DEEPSEEK_V3_1,HERMES_2_PRO,COMMAND_R7B,GRANITE,GPT_OSS,SEED_OSS,NEMOTRON_V2"), "set_format", "get_format");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "reasoning_format", PROPERTY_HINT_ENUM, "NONE,AUTO,DEEPSEEK_LEGACY,DEEPSEEK"), "set_reasoning_format", "get_reasoning_format");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "reasoning_in_content"), "set_reasoning_in_content", "get_reasoning_in_content");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "thinking_forced_open"), "set_thinking_forced_open", "get_thinking_forced_open");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "generation_prompt"), "set_generation_prompt", "get_generation_prompt");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "parse_tool_calls"), "set_parse_tool_calls", "get_parse_tool_calls");
 }
 
@@ -82,8 +82,8 @@ LlamaCommon::ReasoningFormat LlamaCommonChatSyntax::get_reasoning_format() const
 void LlamaCommonChatSyntax::set_reasoning_in_content(bool p_in_content) { m_syntax.reasoning_in_content = p_in_content; }
 bool LlamaCommonChatSyntax::get_reasoning_in_content() const { return m_syntax.reasoning_in_content; }
 
-void LlamaCommonChatSyntax::set_thinking_forced_open(bool p_forced) { m_syntax.thinking_forced_open = p_forced; }
-bool LlamaCommonChatSyntax::get_thinking_forced_open() const { return m_syntax.thinking_forced_open; }
+void LlamaCommonChatSyntax::set_generation_prompt(const String &p_prompt) { m_syntax.generation_prompt = p_prompt.utf8().get_data(); }
+String LlamaCommonChatSyntax::get_generation_prompt() const { return String::utf8(m_syntax.generation_prompt.c_str()); }
 
 void LlamaCommonChatSyntax::set_parse_tool_calls(bool p_parse) { m_syntax.parse_tool_calls = p_parse; }
 bool LlamaCommonChatSyntax::get_parse_tool_calls() const { return m_syntax.parse_tool_calls; }

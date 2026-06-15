@@ -32,8 +32,6 @@ public:
 	void set_grammar_lazy(bool p_lazy);
 	bool get_grammar_lazy() const;
 
-	void set_thinking_forced_open(bool p_forced);
-	bool get_thinking_forced_open() const;
 
 	void set_grammar_triggers(const TypedArray<LlamaCommonGrammarTrigger> &p_triggers);
 	TypedArray<LlamaCommonGrammarTrigger> get_grammar_triggers() const;

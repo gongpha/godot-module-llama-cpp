@@ -82,6 +82,7 @@ if True:#env["builtin_llama"]:
 		thirdparty_dir + "/vendor",
 
 		thirdparty_dir + "/src",
+		"#thirdparty/spirv-headers/include",
 	])
 
 	thirdparty_sources = [
@@ -90,6 +91,7 @@ if True:#env["builtin_llama"]:
 		"ggml/src/ggml-backend.cpp",
 		"ggml/src/ggml-backend-dl.cpp",
 		"ggml/src/ggml-backend-reg.cpp",
+		"ggml/src/ggml-backend-meta.cpp",
 		"ggml/src/ggml-opt.cpp",
 		"ggml/src/ggml-threading.cpp",
 		"ggml/src/ggml-quants.c",
@@ -120,9 +122,10 @@ if True:#env["builtin_llama"]:
 		"src/llama-io.cpp",
 		"src/llama-kv-cache.cpp",
 		"src/llama-kv-cache-iswa.cpp",
+		"src/llama-kv-cache-dsa.cpp",
 		"src/llama-memory.cpp",
-		"src/llama-memory-hybrid-iswa.cpp",
 		"src/llama-memory-hybrid.cpp",
+		"src/llama-memory-hybrid-iswa.cpp",
 		"src/llama-memory-recurrent.cpp",
 		"src/llama-mmap.cpp",
 		"src/llama-model-loader.cpp",
@@ -150,70 +153,91 @@ if True:#env["builtin_llama"]:
 		"src/models/chatglm.cpp",
 		"src/models/codeshell.cpp",
 		"src/models/cogvlm.cpp",
-		"src/models/cohere2-iswa.cpp",
+		"src/models/cohere2.cpp",
+		"src/models/cohere2moe.cpp",
 		"src/models/command-r.cpp",
 		"src/models/dbrx.cpp",
 		"src/models/deci.cpp",
 		"src/models/deepseek.cpp",
 		"src/models/deepseek2.cpp",
+		"src/models/deepseek2ocr.cpp",
+		"src/models/deepseek32.cpp",
 		"src/models/delta-net-base.cpp",
-		"src/models/eurobert.cpp",
-		"src/models/exaone-moe.cpp",
 		"src/models/dots1.cpp",
 		"src/models/dream.cpp",
+		"src/models/eagle3.cpp",
 		"src/models/ernie4-5-moe.cpp",
 		"src/models/ernie4-5.cpp",
+		"src/models/eurobert.cpp",
+		"src/models/exaone-moe.cpp",
 		"src/models/exaone.cpp",
 		"src/models/exaone4.cpp",
 		"src/models/falcon-h1.cpp",
 		"src/models/falcon.cpp",
 		"src/models/gemma-embedding.cpp",
 		"src/models/gemma.cpp",
-		"src/models/gemma2-iswa.cpp",
+		"src/models/gemma2.cpp",
 		"src/models/gemma3.cpp",
-		"src/models/gemma3n-iswa.cpp",
+		"src/models/gemma3n.cpp",
+		"src/models/gemma4-assistant.cpp",
+		"src/models/gemma4.cpp",
+		"src/models/glm-dsa.cpp",
 		"src/models/glm4-moe.cpp",
 		"src/models/glm4.cpp",
 		"src/models/gpt2.cpp",
 		"src/models/gptneox.cpp",
 		"src/models/granite-hybrid.cpp",
+		"src/models/granite-moe.cpp",
 		"src/models/granite.cpp",
 		"src/models/grok.cpp",
 		"src/models/grovemoe.cpp",
 		"src/models/hunyuan-dense.cpp",
 		"src/models/hunyuan-moe.cpp",
+		"src/models/hunyuan-vl.cpp",
 		"src/models/internlm2.cpp",
 		"src/models/jais.cpp",
 		"src/models/jais2.cpp",
 		"src/models/jamba.cpp",
+		"src/models/jina-bert-v2.cpp",
+		"src/models/jina-bert-v3.cpp",
 		"src/models/kimi-linear.cpp",
 		"src/models/lfm2.cpp",
+		"src/models/lfm2moe.cpp",
 		"src/models/llada-moe.cpp",
 		"src/models/llada.cpp",
-		"src/models/llama-iswa.cpp",
+		"src/models/llama-embed.cpp",
 		"src/models/llama.cpp",
+		"src/models/llama4.cpp",
 		"src/models/maincoder.cpp",
-		"src/models/mamba.cpp",
 		"src/models/mamba-base.cpp",
-		"src/models/mimo2-iswa.cpp",
+		"src/models/mamba.cpp",
+		"src/models/mamba2.cpp",
+		"src/models/mellum.cpp",
+		"src/models/mimo2.cpp",
+		"src/models/minicpm.cpp",
 		"src/models/minicpm3.cpp",
 		"src/models/minimax-m2.cpp",
 		"src/models/mistral3.cpp",
+		"src/models/mistral4.cpp",
 		"src/models/modern-bert.cpp",
 		"src/models/mpt.cpp",
+		"src/models/nemotron-h-moe.cpp",
 		"src/models/nemotron-h.cpp",
 		"src/models/nemotron.cpp",
 		"src/models/neo-bert.cpp",
+		"src/models/nomic-bert-moe.cpp",
+		"src/models/nomic-bert.cpp",
 		"src/models/olmo.cpp",
 		"src/models/olmo2.cpp",
 		"src/models/olmoe.cpp",
-		"src/models/openai-moe-iswa.cpp",
+		"src/models/openai-moe.cpp",
 		"src/models/openelm.cpp",
 		"src/models/orion.cpp",
 		"src/models/paddleocr.cpp",
-		"src/models/pangu-embedded.cpp",
+		"src/models/pangu-embed.cpp",
 		"src/models/phi2.cpp",
 		"src/models/phi3.cpp",
+		"src/models/phimoe.cpp",
 		"src/models/plamo.cpp",
 		"src/models/plamo2.cpp",
 		"src/models/plamo3.cpp",
@@ -223,12 +247,12 @@ if True:#env["builtin_llama"]:
 		"src/models/qwen2moe.cpp",
 		"src/models/qwen2vl.cpp",
 		"src/models/qwen3.cpp",
+		"src/models/qwen35.cpp",
+		"src/models/qwen35moe.cpp",
 		"src/models/qwen3moe.cpp",
 		"src/models/qwen3next.cpp",
 		"src/models/qwen3vl.cpp",
-		"src/models/qwen3vl-moe.cpp",
-		"src/models/qwen35.cpp",
-		"src/models/qwen35moe.cpp",
+		"src/models/qwen3vlmoe.cpp",
 		"src/models/refact.cpp",
 		"src/models/rnd1.cpp",
 		"src/models/rwkv6-base.cpp",
@@ -242,9 +266,10 @@ if True:#env["builtin_llama"]:
 		"src/models/stablelm.cpp",
 		"src/models/starcoder.cpp",
 		"src/models/starcoder2.cpp",
-		"src/models/step35-iswa.cpp",
-		"src/models/t5-dec.cpp",
-		"src/models/t5-enc.cpp",
+		"src/models/step35.cpp",
+		"src/models/t5.cpp",
+		"src/models/t5encoder.cpp",
+		"src/models/talkie.cpp",
 		"src/models/wavtokenizer-dec.cpp",
 		"src/models/xverse.cpp",
 	]
@@ -293,8 +318,40 @@ if True:#env["builtin_llama"]:
 				Exit(1)
 			print("Using glslc: " + glslc_path)
 
+			# Dynamically test glslc capabilities
+			shaders_cwd = Dir(vulkan_shaders_dir).abspath
+			feature_tests_dir = os.path.join(shaders_cwd, "feature-tests")
+			glslc_features = []
+			
+			def check_glslc_feature(test_comp):
+				try:
+					result = subprocess.run([glslc_path, "-c", test_comp, "-o", "-"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+					return result.returncode == 0
+				except Exception:
+					return False
+			
+			if check_glslc_feature(os.path.join(feature_tests_dir, "integer_dot.comp")):
+				env_thirdparty.Append(CPPDEFINES=['GGML_VULKAN_INTEGER_DOT_GLSLC_SUPPORT'])
+				glslc_features.append("-DGGML_VULKAN_INTEGER_DOT_GLSLC_SUPPORT")
+			if check_glslc_feature(os.path.join(feature_tests_dir, "bfloat16.comp")):
+				env_thirdparty.Append(CPPDEFINES=['GGML_VULKAN_BFLOAT16_GLSLC_SUPPORT'])
+				glslc_features.append("-DGGML_VULKAN_BFLOAT16_GLSLC_SUPPORT")
+			if check_glslc_feature(os.path.join(feature_tests_dir, "coopmat.comp")):
+				env_thirdparty.Append(CPPDEFINES=['GGML_VULKAN_COOPMAT_GLSLC_SUPPORT'])
+				glslc_features.append("-DGGML_VULKAN_COOPMAT_GLSLC_SUPPORT")
+			if check_glslc_feature(os.path.join(feature_tests_dir, "coopmat2.comp")):
+				env_thirdparty.Append(CPPDEFINES=['GGML_VULKAN_COOPMAT2_GLSLC_SUPPORT'])
+				glslc_features.append("-DGGML_VULKAN_COOPMAT2_GLSLC_SUPPORT")
+			if check_glslc_feature(os.path.join(feature_tests_dir, "coopmat2_decode_vector.comp")):
+				env_thirdparty.Append(CPPDEFINES=['GGML_VULKAN_COOPMAT2_DECODE_VECTOR_GLSLC_SUPPORT'])
+				glslc_features.append("-DGGML_VULKAN_COOPMAT2_DECODE_VECTOR_GLSLC_SUPPORT")
+			
+			# DOT2 has no feature-test file in llama.cpp, assume true if it compiles (or test it manually)
+			env_thirdparty.Append(CPPDEFINES=['GGML_VULKAN_DOT2_GLSLC_SUPPORT'])
+			glslc_features.append("-DGGML_VULKAN_DOT2_GLSLC_SUPPORT")
+
 			# output paths - use bin/gen directory (already gitignored)
-			gen_output_dir = Dir("#bin/gen/vulkan-shaders").abspath
+			gen_output_dir = Dir("#bin/gen/llama-vulkan-shaders").abspath
 			spv_output_dir = os.path.join(gen_output_dir, "spv")
 			target_hpp = os.path.join(gen_output_dir, "ggml-vulkan-shaders.hpp")
 			shaders_cwd = Dir(vulkan_shaders_dir).abspath
@@ -309,7 +366,7 @@ if True:#env["builtin_llama"]:
 			env_thirdparty.Append(CPPPATH=[gen_output_dir])
 
 			# build the shader generator tool synchronously with subprocess
-			shader_gen_exe = os.path.join(Dir("#bin").abspath, "vulkan-shaders-gen")
+			shader_gen_exe = os.path.join(Dir("#bin").abspath, "llama-vulkan-shaders-gen")
 			if env["platform"] == "windows":
 				shader_gen_exe += ".exe"
 
@@ -325,6 +382,7 @@ if True:#env["builtin_llama"]:
 				return False
 
 			need_generate = check_need_generate()
+			print("DEBUG: regenerate_shaders =", regenerate_shaders, "has_pregenerated =", has_pregenerated, "need_generate =", need_generate, "target_hpp =", target_hpp)
 
 			# function to generate all shaders
 			def generate_all_shaders(tool_path):
@@ -361,13 +419,21 @@ if True:#env["builtin_llama"]:
 				return True
 
 			# Build the shader generator tool synchronously if needed
-			if need_generate and not os.path.exists(shader_gen_exe):
+			build_generator = False
+			if need_generate:
+				if not os.path.exists(shader_gen_exe):
+					build_generator = True
+				elif os.path.getmtime(shader_gen_exe) < os.path.getmtime(gen_src_abs):
+					build_generator = True
+					print("vulkan-shaders-gen tool is out of date, rebuilding...")
+
+			if build_generator:
 				print("Building vulkan-shaders-gen tool...")
 				gen_src_abs = os.path.abspath(gen_src)
 				if env.msvc:
-					compile_cmd = ["cl", "/std:c++17", "/EHsc", gen_src_abs, "/Fe:" + shader_gen_exe]
+					compile_cmd = ["cl", "/std:c++17", "/EHsc"] + glslc_features + [gen_src_abs, "/Fe:" + shader_gen_exe]
 				else:
-					compile_cmd = ["g++", "-o", shader_gen_exe, "-std=c++17", "-pthread", gen_src_abs]
+					compile_cmd = ["g++", "-o", shader_gen_exe, "-std=c++17", "-pthread"] + glslc_features + [gen_src_abs]
 
 				print("Compiling shader generator: " + " ".join(compile_cmd))
 				result = subprocess.run(compile_cmd)
@@ -386,11 +452,15 @@ if True:#env["builtin_llama"]:
 			# add ggml-vulkan.cpp from source dir
 			thirdparty_sources += ["../../ggml_vulkan_stub.cpp"]
 
+			# disable optimizations for generated shader files to speed up compilation
+			env_shaders = env_thirdparty.Clone()
+			env_shaders.Append(CCFLAGS=["-g0", "-O0"])
+			
 			# add generated cpp files directly with absolute paths
 			for shader_file in shader_comp_files:
 				shader_name = os.path.basename(shader_file)
 				shader_cpp = os.path.join(gen_output_dir, shader_name + ".cpp")
-				env_thirdparty.add_source_files(thirdparty_obj, [shader_cpp])
+				env_shaders.add_source_files(thirdparty_obj, [shader_cpp])
 
 		else:
 			# use pre-generated shader files
@@ -422,13 +492,18 @@ if True:#env["builtin_llama"]:
 
 	common_helpers = [
 		thirdparty_dir + 'common/arg.cpp',
-		thirdparty_dir + 'common/chat-parser.cpp',
-		thirdparty_dir + 'common/chat-parser-xml-toolcall.cpp',
+		thirdparty_dir + 'common/chat-auto-parser-generator.cpp',
+		thirdparty_dir + 'common/chat-auto-parser-helpers.cpp',
+		thirdparty_dir + 'common/chat-diff-analyzer.cpp',
 		thirdparty_dir + 'common/chat-peg-parser.cpp',
 		thirdparty_dir + 'common/chat.cpp',
 		thirdparty_dir + 'common/common.cpp',
 		thirdparty_dir + 'common/console.cpp',
+		thirdparty_dir + 'common/debug.cpp',
 		thirdparty_dir + 'common/download.cpp',
+		thirdparty_dir + 'common/fit.cpp',
+		thirdparty_dir + 'common/hf-cache.cpp',
+		thirdparty_dir + 'common/imatrix-loader.cpp',
 		thirdparty_dir + 'common/json-partial.cpp',
 		thirdparty_dir + 'common/json-schema-to-grammar.cpp',
 		thirdparty_dir + 'common/llguidance.cpp',
@@ -438,11 +513,11 @@ if True:#env["builtin_llama"]:
 		thirdparty_dir + 'common/ngram-mod.cpp',
 		thirdparty_dir + 'common/peg-parser.cpp',
 		thirdparty_dir + 'common/preset.cpp',
+		thirdparty_dir + 'common/reasoning-budget.cpp',
 		thirdparty_dir + 'common/regex-partial.cpp',
 		thirdparty_dir + 'common/sampling.cpp',
 		thirdparty_dir + 'common/speculative.cpp',
 		thirdparty_dir + 'common/unicode.cpp',
-		
 		thirdparty_dir + 'common/jinja/caps.cpp',
 		thirdparty_dir + 'common/jinja/lexer.cpp',
 		thirdparty_dir + 'common/jinja/parser.cpp',
@@ -479,8 +554,8 @@ env_llama.add_source_files(module_obj, 'llama_tool.cpp')
 env_llama.add_source_files(module_obj, 'llama_tool_callable.cpp')
 env_llama.add_source_files(module_obj, 'llama_model_instance.cpp')
 env_llama.add_source_files(module_obj, 'common/*.cpp')
+env_llama.add_source_files(module_obj, 'build-info.cpp')
 env_llama.add_source_files(module_obj, 'register_types.cpp')
-
 env.modules_sources += module_obj
 
 env.Depends(module_obj, thirdparty_obj)

@@ -77,8 +77,10 @@ public:
 	void set_reasoning_in_content(bool p_in_content);
 	bool get_reasoning_in_content() const;
 
-	void set_thinking_forced_open(bool p_forced);
-	bool get_thinking_forced_open() const;
+
+
+	void set_generation_prompt(const String &p_prompt);
+	String get_generation_prompt() const;
 
 	void set_parse_tool_calls(bool p_parse);
 	bool get_parse_tool_calls() const;
