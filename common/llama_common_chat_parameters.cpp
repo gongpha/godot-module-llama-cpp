@@ -10,6 +10,7 @@
 void LlamaCommonChatParameters::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_chat_format", "format"), &LlamaCommonChatParameters::set_chat_format);
 	ClassDB::bind_method(D_METHOD("get_chat_format"), &LlamaCommonChatParameters::get_chat_format);
+	ClassDB::bind_method(D_METHOD("apply_to_syntax", "syntax"), &LlamaCommonChatParameters::apply_to_syntax);
 	ClassDB::bind_method(D_METHOD("set_prompt", "prompt"), &LlamaCommonChatParameters::set_prompt);
 	ClassDB::bind_method(D_METHOD("get_prompt"), &LlamaCommonChatParameters::get_prompt);
 	ClassDB::bind_method(D_METHOD("set_grammar", "grammar"), &LlamaCommonChatParameters::set_grammar);
@@ -41,6 +42,17 @@ const common_chat_params &LlamaCommonChatParameters::get_params() const {
 
 void LlamaCommonChatParameters::set_chat_format(LlamaCommonChat::ChatFormat p_format) { params.format = (common_chat_format)p_format; }
 LlamaCommonChat::ChatFormat LlamaCommonChatParameters::get_chat_format() const { return (LlamaCommonChat::ChatFormat)params.format; }
+
+void LlamaCommonChatParameters::apply_to_syntax(Ref<LlamaCommonChatSyntax> p_syntax) const {
+	if (p_syntax.is_null()) return;
+	common_chat_parser_params p = p_syntax->get_syntax();
+	p.format = params.format;
+	p.generation_prompt = params.generation_prompt;
+	if (!params.parser.empty()) {
+		p.parser.load(params.parser);
+	}
+	p_syntax->set_syntax(p);
+}
 
 void LlamaCommonChatParameters::set_prompt(const String &p_prompt) { params.prompt = p_prompt.utf8().get_data(); }
 String LlamaCommonChatParameters::get_prompt() const { return String::utf8(params.prompt.c_str()); }

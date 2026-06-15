@@ -23,6 +23,8 @@ public:
 	void set_chat_format(LlamaCommonChat::ChatFormat p_format);
 	LlamaCommonChat::ChatFormat get_chat_format() const;
 
+	void apply_to_syntax(Ref<LlamaCommonChatSyntax> p_syntax) const;
+
 	void set_prompt(const String &p_prompt);
 	String get_prompt() const;
 
