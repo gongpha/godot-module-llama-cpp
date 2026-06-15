@@ -363,7 +363,7 @@ if True:#env["builtin_llama"]:
 			os.makedirs(spv_output_dir, exist_ok=True)
 
 			# add generated header include path
-			env_thirdparty.Append(CPPPATH=[gen_output_dir])
+			env_thirdparty.Append(CPPPATH=[gen_output_dir.replace('\\', '/')])
 
 			# build the shader generator tool synchronously with subprocess
 			shader_gen_exe = os.path.join(Dir("#bin").abspath, "llama-vulkan-shaders-gen")
@@ -459,7 +459,7 @@ if True:#env["builtin_llama"]:
 			# add generated cpp files directly with absolute paths
 			for shader_file in shader_comp_files:
 				shader_name = os.path.basename(shader_file)
-				shader_cpp = os.path.join(gen_output_dir, shader_name + ".cpp")
+				shader_cpp = os.path.join(gen_output_dir, shader_name + ".cpp").replace('\\', '/')
 				env_shaders.add_source_files(thirdparty_obj, [shader_cpp])
 
 		else:
